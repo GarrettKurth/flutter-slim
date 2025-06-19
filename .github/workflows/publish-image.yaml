@@ -26,7 +26,7 @@ jobs:
 
       - name: Check for new Flutter versions 
         env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.TOKEN}}
         run: sh scripts/update_flutter_versions.sh
 
       # Create a Pull Request if there are any changes.
