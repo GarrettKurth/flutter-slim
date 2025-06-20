@@ -15,6 +15,7 @@ RUN apt-get update && \
     unzip \
     xz-utils \
     bash \
+    sudo \
     ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     update-ca-certificates 
