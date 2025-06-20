@@ -31,10 +31,14 @@ jobs:
         run: sh scripts/update_flutter_versions.sh
 
       - name: Build and push Docker images
-        if: github.ref == 'refs/heads/master'  # Only run on master branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pass the token to the script
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
         run: |
+          eval $(yq '.docker_builder.env.matrix[]' .builder.yml | \
+            jq -r 'to_entries | map("export \(.key)=\(.value)") | join("\n")')
+          
+          # Make script executable and run it
           chmod +x ci.sh
           ./ci.sh
       # Create a Pull Request if there are any changes.
