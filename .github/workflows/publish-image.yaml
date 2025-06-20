@@ -35,12 +35,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          eval $(yq '.docker_builder.env.matrix[]' .builder.yml | \
-            jq -r 'to_entries | map("export \(.key)=\(.value)") | join("\n")')
+          # Get the first matrix entry's variables
+          DOCKER_TAG=$(yq eval '.docker_builder.env.matrix[0].DOCKER_TAG' .builder.yml)
+          FLUTTER_VERSION=$(yq eval '.docker_builder.env.matrix[0].FLUTTER_VERSION' .builder.yml)
           
-          # Make script executable and run it
-          chmod +x ci.sh
-          ./ci.sh
+          # Login to GitHub Container Registry
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+          
+          # Build and push if on master branch
+          if [ "$BRANCH" = "master" ]; then
+            docker buildx build --platform linux/amd64,linux/arm64 --push \
+              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
+              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:$DOCKER_TAG \
+              --build-arg flutter_version=$FLUTTER_VERSION \
+              sdk
+          else
+            docker buildx build --platform linux/amd64,linux/arm64 \
+              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
+              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:$DOCKER_TAG \
+              --build-arg flutter_version=$FLUTTER_VERSION \
+              sdk
+          fi
+
       # Create a Pull Request if there are any changes.
       # This is automatically checked internally
       - name: Create Pull Request
