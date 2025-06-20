@@ -4,7 +4,7 @@ set -e
 # This script fetches the latest version of a the stable and beta flutter channels
 # and edits the .builder.yml file with those versions
 
-# Script from cirus labs <3
+# Script from cirrus labs <3
 
 releases_json=$(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json)
 

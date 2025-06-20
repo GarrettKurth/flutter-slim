@@ -1,8 +1,8 @@
 name: "Check Flutter versions"
 on:
   schedule:
-    # Every 2 hours
-    - cron: "0 */2 * * *"
+    # Every day
+    - cron: "0 0 * * 0-6"
   workflow_dispatch:
 
 jobs:
@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -26,9 +27,16 @@ jobs:
 
       - name: Check for new Flutter versions 
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Changed from TOKEN to GITHUB_TOKEN
         run: sh scripts/update_flutter_versions.sh
 
+      - name: Build and push Docker images
+        if: github.ref == 'refs/heads/master'  # Only run on master branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pass the token to the script
+        run: |
+          chmod +x ci.sh
+          ./ci.sh
       # Create a Pull Request if there are any changes.
       # This is automatically checked internally
       - name: Create Pull Request
