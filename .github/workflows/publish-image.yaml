@@ -39,20 +39,21 @@ jobs:
           DOCKER_TAG=$(yq eval '.docker_builder.env.matrix[0].DOCKER_TAG' .builder.yml)
           FLUTTER_VERSION=$(yq eval '.docker_builder.env.matrix[0].FLUTTER_VERSION' .builder.yml)
           
+          LOWERCASE_ACTOR=$(echo "$GITHUB_ACTOR" | tr '[:upper:]' '[:lower:]')
           # Login to GitHub Container Registry
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
           
           # Build and push if on master branch
           if [ "$BRANCH" = "master" ]; then
             docker buildx build --platform linux/amd64,linux/arm64 --push \
-              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
-              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:$DOCKER_TAG \
+              --tag ghcr.io/$LOWERCASE_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
+              --tag ghcr.io/$LOWERCASE_ACTOR/flutter-slim:$DOCKER_TAG \
               --build-arg flutter_version=$FLUTTER_VERSION \
               sdk
           else
             docker buildx build --platform linux/amd64,linux/arm64 \
-              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
-              --tag ghcr.io/$GITHUB_ACTOR/flutter-slim:$DOCKER_TAG \
+              --tag ghcr.io/$LOWERCASE_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
+              --tag ghcr.io/$LOWERCASE_ACTOR/flutter-slim:$DOCKER_TAG \
               --build-arg flutter_version=$FLUTTER_VERSION \
               sdk
           fi
