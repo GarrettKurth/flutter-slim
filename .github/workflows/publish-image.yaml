@@ -26,9 +26,13 @@ jobs:
           sudo apt-get install -y jq curl
 
       - name: Check for new Flutter versions 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Changed from TOKEN to GITHUB_TOKEN
         run: sh scripts/update_flutter_versions.sh
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          install: true
 
       - name: Build and push Docker images
         env:
