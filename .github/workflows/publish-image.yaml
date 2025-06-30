@@ -48,7 +48,7 @@ jobs:
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
           
           # Build and push if on master branch
-          if [ "$BRANCH" = "master" ]; then
+          if [ "$BRANCH" = "main" ]; then
             docker buildx build --platform linux/amd64,linux/arm64 --push \
               --tag ghcr.io/$LOWERCASE_ACTOR/flutter-slim:${FLUTTER_VERSION/+/-} \
               --tag ghcr.io/$LOWERCASE_ACTOR/flutter-slim:$DOCKER_TAG \
