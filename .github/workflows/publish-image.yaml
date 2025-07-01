@@ -46,7 +46,13 @@ jobs:
           LOWERCASE_ACTOR=$(echo "$GITHUB_ACTOR" | tr '[:upper:]' '[:lower:]')
           # Login to GitHub Container Registry
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-          
+          # Check if the version tag already exists
+          TAG_EXISTS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+          "https://ghcr.io/v2/$LOWERCASE_ACTOR/flutter-slim/tags/list" | jq -r '.tags[]?' | grep -x "$FLUTTER_VERSION" || true)
+          if [ -n "$TAG_EXISTS" ]; then
+            echo "Tag $FLUTTER_VERSION already exists. Skipping publish."
+            exit 0
+          fi
           # Build and push if on master branch
           if [ "$BRANCH" = "main" ]; then
             docker buildx build --platform linux/amd64,linux/arm64 --push \
